@@ -122,7 +122,11 @@ function voices(){return 'speechSynthesis' in window?speechSynthesis.getVoices()
 function speak(text,speaker='David',onEnd){if(!('speechSynthesis' in window)){$('playbackStatus').textContent='Audio is not available in this browser. You can still read the lines!';return;}
  const id=++token;try{speechSynthesis.cancel();}catch(e){}
  const utterance=new SpeechSynthesisUtterance(text);utterance.lang='en-US';utterance.rate=Number($('speed').value);utterance.pitch=speaker==='Anna'?1.18: speaker==='Dad'?.91:1;utterance.volume=1;
- const options=voices();const en=options.filter(v=>/^en[-_]/i.test(v.lang));if(en.length)utterance.voice=en[(speaker==='Anna'&&en.length>1)?1:0];
+ const options=voices();const en=options.filter(v=>/^en[-_]/i.test(v.lang));
+ const femaleVoice=en.find(v=>/\b(female|woman|zira|aria|jenny|sara|susan|hazel|samantha|victoria|karen|moira|tessa|fiona|ava|allison|salli|joanna|ivy|kimberly|kendra|amy|emma|nicole|catherine|serena|libby|sonia|natasha|clara|michelle|ana)\b/i.test(v.name));
+ const otherVoice=en.find(v=>/\b(male|man|david|mark|guy|james|daniel|alex|fred|george|ryan|brian|eric|christopher|roger|thomas)\b/i.test(v.name));
+ const selectedVoice=speaker==='Anna'?(femaleVoice||en.find(v=>v.default)||en[0]):(otherVoice||en[0]);
+ if(selectedVoice)utterance.voice=selectedVoice;
  utterance.onend=()=>{if(id===token&&onEnd)onEnd();};utterance.onerror=e=>{if(id===token){playing=false;$('playbackStatus').textContent='Audio stopped. Try tapping Repeat or use another browser.';}};
  try{speechSynthesis.speak(utterance);}catch(e){$('playbackStatus').textContent='Sorry, this browser cannot play speech.';}
 }
